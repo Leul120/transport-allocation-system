@@ -5,16 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78133d1d-625d-4443-90e3-a986ec3fa44e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stationCamera" beforeDir="false" afterPath="$PROJECT_DIR$/stationCamera" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stationCamera/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stationCamera/src/main/java/com/stationCamera/StationCameraApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/stationCamera/src/main/java/com/stationCamera/StationCameraApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stationCamera/src/main/java/com/stationCamera/config/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/stationCamera/src/main/java/com/stationCamera/config/JwtAuthenticationFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stationCamera/src/main/java/com/stationCamera/services/impl/AuthenticationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/stationCamera/src/main/java/com/stationCamera/services/impl/AuthenticationServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stationCamera/src/main/java/com/stationCamera/services/impl/JwtServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/stationCamera/src/main/java/com/stationCamera/services/impl/JwtServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tas" beforeDir="false" afterPath="$PROJECT_DIR$/tas" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tas/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tas/src/main/java/com/tas/services/impl/JwtServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/tas/src/main/java/com/tas/services/impl/JwtServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,7 +15,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/stationCamera" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
@@ -46,6 +39,21 @@
       <recent name="C:\Users\PC\Downloads\transport-allocation-system" />
     </key>
   </component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="transport-allocation-system" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="transport-allocation-system" />
+      <option name="filePath" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -56,5 +64,10 @@
       <updated>1739512797252</updated>
     </task>
     <servers />
+  </component>
+  <component name="com.apollographql.ijplugin.settings.ProjectSettingsState">
+    <option name="hasEnabledGraphQLPluginApolloKotlinSupport" value="true" />
+    <option name="lspPassPathToSuperGraphYaml" value="false" />
+    <option name="telemetryInstanceId" value="de2cf3a3-936f-4a8e-a306-f2f90d08a394" />
   </component>
 </project>

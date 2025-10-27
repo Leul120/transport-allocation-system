@@ -1,0 +1,16 @@
+# Ignore build outputs
+**/target/
+
+# IDE files
+.idea/
+*.iml
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Maven wrapper
+/.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
