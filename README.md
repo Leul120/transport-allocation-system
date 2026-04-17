@@ -380,7 +380,7 @@ ENTRYPOINT ["java", "-jar", "/app.jar"]
 
 For issues or questions:
 - Open a GitHub Issue
-- Contact: [your-email@example.com]
+- Contact: [leulmelkamu15@gmail.com]
 
 ---
 
