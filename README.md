@@ -1,138 +1,387 @@
-
 # Transport Allocation System
 
-A small monorepo containing two Spring Boot services used for transport allocation and station camera features.
-
-Services
- - `stationCamera` — camera / image-processing microservice (default port: 8082)
- - `tas` — transport allocation system (APIs for allocations, vehicles, stations) (default port: 8081)
-
-This README explains repository layout, how to build and run each service locally, required environment variables, and notes for contributors.
-
-## Repository layout
-
-Top-level folders:
-
-- `stationCamera/` — Spring Boot Maven project for station camera features.
-- `tas/` — Spring Boot Maven project for the transport allocation system.
-- `.gitignore` — ignores `**/target/` and common IDE files (prevents build artifacts from being committed).
-
-Each subproject is a standalone Maven project with its own `pom.xml` and `src/` tree.
-
-## Requirements
-
-- Java 17 or later (project logs show Java 21 was used; Java 17+ is recommended)
-- Maven or the included Maven Wrapper (`mvnw` / `mvnw.cmd`)
-- A running database (MySQL is used by default in application properties, or change datasource settings for other DBs)
-
-## Quick start — build & run
-
-From the repo root on Windows PowerShell (adjust for Linux/macOS by using the POSIX `./mvnw` script):
-
-Build both modules (skip tests for faster local builds):
-
-```powershell
-cd 'c:\Users\PC\Downloads\transport-allocation-system'
-.\stationCamera\mvnw.cmd -f stationCamera\pom.xml clean package -DskipTests
-.\tas\mvnw.cmd -f tas\pom.xml clean package -DskipTests
-```
-
-Run a module via Maven (convenient during development):
-
-```powershell
-cd tas
-.\mvnw.cmd spring-boot:run
-
-cd ..\stationCamera
-.\mvnw.cmd spring-boot:run
-```
-
-Or run a packaged JAR:
-
-```powershell
-java -jar stationCamera\target\stationCamera-0.0.1-SNAPSHOT.jar
-java -jar tas\target\tas-0.0.1-SNAPSHOT.jar
-```
-
-Run tests:
-
-```powershell
-cd stationCamera
-.\mvnw.cmd test
-
-cd ..\tas
-.\mvnw.cmd test
-```
-
-## Configuration & Environment variables
-
-Both services read configuration from `application.properties`/`application.yml`. The projects reference common environment variables for database, OAuth and cloud storage. Example variables you should set in your environment or provide via an external config provider:
-
-- Database
-	- `URL` / `spring.datasource.url` (e.g. `jdbc:mysql://localhost:3306/dbname`)
-	- `USERNAME` / `spring.datasource.username`
-	- `PASSWORD` / `spring.datasource.password`
-
-- Google OAuth
-	- `GOOGLE_CLIENT_ID`
-	- `GOOGLE_CLIENT_SECRET`
-
-- AWS
-	- `AWS_ACCESS_ID` (or `AWS_ACCESS_KEY`)
-	- `AWS_SECRET_KEY`
-	- `AWS_REGION`
-	- `AWS_BUCKET_NAME`
-
-- Mapbox
-	- `MAPBOX_KEY`
-
-Set env vars on PowerShell for a session:
-
-```powershell
-$env:URL = 'jdbc:mysql://localhost:3306/dbname'
-$env:USERNAME = 'root'
-$env:PASSWORD = 's3cret'
-# then run app in same shell
-.\tas\mvnw.cmd spring-boot:run
-```
-
-Security note: never commit real secrets to Git. If secrets were accidentally committed, rotate them immediately and consider rewriting repository history to remove them.
-
-## Why some folders looked empty on GitHub
-
-This repository previously had `stationCamera` and `tas` tracked as gitlinks (mode `160000`), so GitHub displayed them as empty links rather than the projects' files. Those gitlinks were converted to normal tracked directories and their sources are now pushed to the `main` branch.
-
-Also: compiled outputs under `target/` were previously tracked; these were removed from the index and a `.gitignore` was added to prevent future commits of build artifacts.
-
-## Developer notes and contribution guidelines
-
-- Fork, create a feature branch, and open a PR against `main`.
-- Ensure unit tests pass and no secrets or large binaries are included with commits.
-- Keep commits focused and add meaningful commit messages.
-
-Suggested PR checklist:
-
-- Code builds and unit tests pass
-- No secrets or large artifacts committed
-- Documentation updated as needed
-
-## Rewriting history to remove secrets / large files
-
-If sensitive values or very large files exist in repository history you can remove them with tools such as `git filter-repo` or the BFG Repo-Cleaner. This rewrites history and requires a force-push and coordination with collaborators. Ask maintainers before performing this operation.
-
-## Troubleshooting
-
-- Port conflicts: change `server.port` in `application.properties` or set `SERVER_PORT` env var.
-- DB connection failures: check `spring.datasource.url`, credentials and that the DB is reachable.
-- Push rejected by GitHub: you may hit pre-receive hooks (large-file limits, secret scanning). Fix locally (remove the offending files) and push cleaned commits.
-
-## License
-
-Add a `LICENSE` file for your preferred license.
+An intelligent transport management platform that optimizes vehicle allocation based on real-time station crowd density. Built with a microservices architecture using Spring Boot.
 
 ---
 
-If you'd like, I can also:
+## What This Project Does
 
-- remove local `target/` directories to reclaim disk space, or
-- run a local secret scan and help remove secrets from history (requires force-push and coordination).
+**In Simple Terms:**
+This system helps transport operators efficiently allocate vehicles to stations based on how crowded each station is. When a station gets busy, the system automatically assigns vehicles to that location, ensuring passengers don't wait too long.
+
+**Key Features:**
+- **Real-time Station Monitoring**: Tracks crowd density at transport stations using camera feeds and computer vision
+- **Smart Vehicle Allocation**: Automatically assigns vehicles to stations based on demand and availability
+- **Driver Mobile Interface**: Drivers receive allocation assignments and can update their status in real-time
+- **Admin Dashboard**: Comprehensive management interface for stations, vehicles, drivers, and allocations
+- **Secure Authentication**: JWT-based auth with role-based access control (Admin, Driver, User)
+
+---
+
+## Architecture Overview
+
+This is a **monorepo** containing two independent microservices:
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| `tas` | 8081 | Core Transport Allocation System - manages stations, vehicles, drivers, allocations |
+| `stationCamera` | 8082 | Camera/Image Processing Service - handles person counting via computer vision |
+
+**How They Work Together:**
+1. Station cameras capture video feeds
+2. `stationCamera` service processes frames using AWS Rekognition to count people
+3. Person count data flows to the `tas` service
+4. `tas` uses this data to calculate optimal vehicle allocations
+5. Drivers receive assignments via mobile/web app
+
+---
+
+## Technology Stack
+
+### Backend Framework
+- **Spring Boot 3.4.1** - Java-based microservices framework
+- **Java 17** - Modern LTS Java version
+- **Maven** - Build and dependency management
+
+### Data & Storage
+- **MySQL** - Primary relational database
+- **JPA/Hibernate** - Object-relational mapping
+- **Spring Data JPA** - Data access layer
+
+### Security
+- **Spring Security** - Authentication and authorization
+- **JWT (JSON Web Tokens)** - Stateless authentication
+- **Google OAuth 2.0** - Social login integration
+
+### Cloud & AI Services
+- **AWS S3** - Image/file storage
+- **AWS Rekognition** - Computer vision for person detection
+- **JavaCV** - Video frame capture and processing
+- **Apache Kafka** - Event streaming (configured for person count events)
+
+### Real-time Communication
+- **WebSocket** - Bidirectional driver location updates
+- **Spring Messaging** - Message handling infrastructure
+
+### Utilities
+- **Lombok** - Boilerplate code reduction
+- **Mapbox API** - Geolocation and mapping services
+- **Micrometer** - Application metrics and monitoring
+
+---
+
+## Project Structure
+
+```
+Transport-Allocation-System/
+├── tas/                          # Main allocation service
+│   ├── src/main/java/com/tas/
+│   │   ├── controllers/          # REST API endpoints
+│   │   │   ├── AuthenticationController.java  # Login/signup
+│   │   │   ├── AdminController.java           # Admin CRUD ops
+│   │   │   └── UserController.java            # Driver operations
+│   │   ├── entities/             # JPA domain models
+│   │   │   ├── Station.java      # Transport stations with location
+│   │   │   ├── Vehicle.java      # Vehicle details & driver link
+│   │   │   ├── Allocation.java   # Vehicle-to-station assignments
+│   │   │   ├── PersonCount.java  # Crowd density readings
+│   │   │   ├── User.java         # Driver/user accounts
+│   │   │   └── Location.java     # Geographic coordinates
+│   │   ├── services/             # Business logic layer
+│   │   ├── repositories/         # Data access interfaces
+│   │   ├── requests/             # DTOs for incoming data
+│   │   └── responses/            # Standardized API responses
+│   └── pom.xml
+│
+├── stationCamera/                # CV microservice
+│   ├── src/main/java/com/stationCamera/
+│   │   ├── controllers/
+│   │   ├── services/             # Image processing logic
+│   │   ├── entities/
+│   │   └── config/               # AWS, Kafka configurations
+│   └── pom.xml
+│
+└── README.md
+```
+
+---
+
+## Core Domain Models
+
+### Station
+- Unique identifier, name, location (lat/lng)
+- Status (ACTIVE/INACTIVE)
+- List of person count readings (crowd history)
+
+### Vehicle
+- Type (BUS, MINIBUS, etc.), capacity, registration number
+- Current status (AVAILABLE, ALLOCATED, IN_TRANSIT, MAINTENANCE)
+- Linked to a driver (User)
+- Real-time location tracking
+
+### Allocation
+- Links a vehicle to a station
+- Timestamp of creation
+- Status (PENDING, ACTIVE, COMPLETED, CANCELLED)
+
+### PersonCount
+- Station reference
+- Count of people detected
+- Timestamp (for historical analysis)
+
+---
+
+## API Overview
+
+### Authentication (`/api/v1/auth`)
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/signup` | POST | Register new driver/admin |
+| `/signin` | POST | Login with credentials |
+| `/refresh` | POST | Refresh JWT token |
+
+### Admin (`/api/v1/admin`)
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/get-dashboard` | GET | System overview stats |
+| `/get-all-stations` | GET | List all stations |
+| `/get-all-vehicles` | GET | List all vehicles |
+| `/get-all-allocations` | GET | View all allocations |
+| `/get-all-users` | GET | List all users/drivers |
+| `/add-station` | POST | Create new station |
+| `/update-station/{id}` | PUT | Modify station details |
+| `/delete-station/{id}` | DELETE | Remove station |
+| `/delete-allocation/{id}` | DELETE | Cancel allocation |
+
+### Driver/User (`/api/v1/user`)
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/get-allocation` | GET | View current driver's allocation |
+| `/get-vehicle` | GET | Get linked vehicle details |
+| `/update-allocation-status/{id}` | GET | Mark allocation complete |
+| `/update-vehicle-status/{status}` | GET | Update vehicle state |
+| `/update-vehicle` | PUT | Update location/status |
+
+---
+
+## Prerequisites
+
+- **Java 17+** (OpenJDK or Oracle JDK)
+- **Maven 3.8+** (or use included wrapper: `mvnw`)
+- **MySQL 8.0+** (running locally or accessible instance)
+- **AWS Account** (for Rekognition and S3 - optional for local dev)
+- **Google Cloud Console** (for OAuth - optional)
+
+---
+
+## Quick Start
+
+### 1. Clone and Setup
+
+```bash
+git clone <repository-url>
+cd Transport-Allocation-System
+```
+
+### 2. Configure Environment
+
+Create environment variables (PowerShell example):
+
+```powershell
+# Database
+$env:URL = "jdbc:mysql://localhost:3306/tas_db"
+$env:USERNAME = "root"
+$env:PASSWORD = "your_password"
+
+# AWS (optional - for image processing)
+$env:AWS_ACCESS_ID = "your_access_key"
+$env:AWS_SECRET_KEY = "your_secret_key"
+$env:AWS_REGION = "us-east-1"
+
+# Google OAuth (optional)
+$env:GOOGLE_CLIENT_ID = "your_client_id"
+$env:GOOGLE_CLIENT_SECRET = "your_client_secret"
+
+# Mapbox (for geolocation features)
+$env:MAPBOX_KEY = "your_mapbox_token"
+```
+
+### 3. Build Both Services
+
+```powershell
+# Build TAS service
+cd tas
+.\mvnw.cmd clean package -DskipTests
+
+# Build stationCamera service
+cd ..\stationCamera
+.\mvnw.cmd clean package -DskipTests
+```
+
+### 4. Run Services
+
+```powershell
+# Terminal 1 - Start TAS (port 8081)
+cd tas
+.\mvnw.cmd spring-boot:run
+
+# Terminal 2 - Start stationCamera (port 8082)
+cd stationCamera
+.\mvnw.cmd spring-boot:run
+```
+
+### 5. Verify
+
+- TAS API: http://localhost:8081/api/v1/auth/
+- stationCamera: http://localhost:8082/
+
+---
+
+## Development Commands
+
+```powershell
+# Run tests
+cd tas; .\mvnw.cmd test
+cd stationCamera; .\mvnw.cmd test
+
+# Run with specific profile
+cd tas; .\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
+
+# Package for deployment
+cd tas; .\mvnw.cmd clean package
+cd stationCamera; .\mvnw.cmd clean package
+
+# Run packaged JARs
+java -jar tas/target/tas-0.0.1-SNAPSHOT.jar
+java -jar stationCamera/target/stationCamera-0.0.1-SNAPSHOT.jar
+```
+
+---
+
+## Configuration Reference
+
+### `tas/src/main/resources/application.properties`
+
+```properties
+# Server
+server.port=8081
+
+# Database
+spring.datasource.url=${URL}
+spring.datasource.username=${USERNAME}
+spring.datasource.password=${PASSWORD}
+spring.jpa.hibernate.ddl-auto=update
+
+# Security
+spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID}
+spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET}
+
+# CORS (frontend integration)
+spring.web.cors.allowed-origins=http://localhost:3000
+spring.web.cors.allowed-methods=GET,POST,PUT,DELETE
+
+# AWS
+aws.accessKeyId=${AWS_ACCESS_ID}
+aws.region=${AWS_REGION}
+mapbox_key=${MAPBOX_KEY}
+```
+
+---
+
+## Security Considerations
+
+**⚠️ NEVER commit real secrets to Git.**
+
+If secrets were accidentally committed:
+1. **Rotate credentials immediately** in AWS/Google consoles
+2. Use `git filter-repo` or BFG Repo-Cleaner to remove from history
+3. Force push cleaned history (coordinate with team)
+
+**Security Features Implemented:**
+- Passwords hashed with BCrypt
+- JWT tokens with expiration
+- Role-based access control (RBAC)
+- CORS configuration for frontend isolation
+- Input validation on all endpoints
+
+---
+
+## Deployment Options
+
+### Docker (Recommended)
+```dockerfile
+# Example Dockerfile for tas service
+FROM eclipse-temurin:17-jdk-alpine
+COPY target/tas-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+```
+
+### AWS ECS/Fargate
+- Containerize both services
+- Use AWS RDS for managed MySQL
+- Configure ALB for load balancing
+- Set up CloudWatch for monitoring
+
+### Traditional Server
+- Use systemd services or PM2
+- Configure reverse proxy (Nginx)
+- Enable HTTPS with Let's Encrypt
+
+---
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Port 8081/8082 already in use | Change `server.port` in `application.properties` |
+| Database connection refused | Verify MySQL is running; check URL/credentials |
+| AWS Rekognition errors | Check AWS credentials and region configuration |
+| JWT token invalid | Ensure system clocks are synchronized; check token expiration |
+| CORS errors from frontend | Verify `spring.web.cors.allowed-origins` matches your frontend URL |
+| Maven build failures | Run `mvnw clean` and ensure Java 17 is in PATH |
+
+---
+
+## Contributing
+
+1. **Fork** the repository
+2. Create a **feature branch** (`git checkout -b feature/amazing-feature`)
+3. **Commit** changes with clear messages
+4. **Push** to your fork (`git push origin feature/amazing-feature`)
+5. Open a **Pull Request** against `main`
+
+**PR Checklist:**
+- [ ] Code compiles without warnings
+- [ ] All tests pass
+- [ ] No secrets committed
+- [ ] API documentation updated (if applicable)
+- [ ] Commit messages are descriptive
+
+---
+
+## Future Enhancements
+
+- [ ] Machine learning for demand prediction
+- [ ] Mobile app for drivers (React Native/Flutter)
+- [ ] Real-time passenger mobile app
+- [ ] Integration with traffic APIs for route optimization
+- [ ] Analytics dashboard with historical trends
+
+---
+
+## License
+
+[Add your license here - MIT, Apache 2.0, etc.]
+
+---
+
+## Support
+
+For issues or questions:
+- Open a GitHub Issue
+- Contact: [your-email@example.com]
+
+---
+
+**Built with Spring Boot | AWS | MySQL | Computer Vision**
